@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.joe.cloud.mapper.UserFileMapper">
+
+	<select id="selectUserFileListByPath" resultType="org.joe.cloud.model.dto.UserFileDto">
+		select user_file.id,
+		       `name`,
+		       `path`,
+		       extension,
+		       update_time,
+		       size,
+		       is_folder,
+		       url
+		from user_file
+			     left join physical_file on user_file.physical_file_id = physical_file.id
+		where user_file.path = #{path}
+		  and deleted = 0
+		order by is_folder desc
+		limit #{beginLoc}, #{pageSize}
+	</select>
+
+	<select id="selectUserFileListByExtension" resultType="org.joe.cloud.model.dto.UserFileDto">
+		select user_file.id, `name`, `path`, extension, update_time, size, url, is_folder
+		from user_file left join physical_file on physical_file.id = user_file.physical_file_id
+		where user_file.extension in
+		<foreach collection="extensions" open="(" close=")" separator="," item="extension">#{extension}</foreach>
+		and user_file.deleted = 0
+		limit #{beginLoc}, #{pageSize}
+	</select>
+	<select id="selectUserFileListNotInExtensions" resultType="org.joe.cloud.model.dto.UserFileDto">
+		select `name`, `path`, extension, update_time, size
+		from user_file left join physical_file on physical_file.id = user_file.physical_file_id
+		where user_file.extension not in
+		<foreach collection="extensions" open="(" close=")" separator="," item="extension">#{extension}</foreach>
+		and user_file.deleted = 0
+		limit #{beginLoc}, #{pageSize}
+	</select>
+
+	<update id="updatePathByPath">
+		update user_file
+		set `path`=replace(path, #{oldPath}, #{newPath})
+		where `path` like N'${oldPath}%'
+	</update>
+</mapper>

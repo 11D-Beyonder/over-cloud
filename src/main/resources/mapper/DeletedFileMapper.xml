@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.joe.cloud.mapper.DeletedFileMapper">
+
+	<select id="selectAllDeletedFile" resultType="org.joe.cloud.model.dto.DeletedFileDto">
+		select deleted_file.id, name, extension, delete_time, size, is_folder, path
+		from deleted_file
+			     inner join user_file on deleted_file.user_file_id = user_file.id
+			     left join physical_file on user_file.physical_file_id = physical_file.id
+		order by delete_time desc
+		limit #{beginLoc}, #{pageSize}
+	</select>
+</mapper>

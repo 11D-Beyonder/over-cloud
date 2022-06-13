@@ -1,0 +1,32 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  servlet:
+    multipart:
+      enabled: true
+      max-request-size: 200MB
+      max-file-size: 1000MB
+  datasource:
+    url: jdbc:mysql://localhost:3306/over_cloud?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: update # 只更新表结构不创建新表
+        dialect: org.hibernate.dialect.MySQL8Dialect # 设置SQL方言
+    show-sql: true
+
+knife4j:
+  enable: true
+  setting:
+    enableFooter: false
+    enableFooterCustom: true
+    footerCustomContent: Apache License 2.0 | Copyright  2022-[Tianze Zhu（OverCloud）](https://gitee.com/pro_11d_beyonder/over-cloud)
+    enableHomeCustom: true
+    homeCustomLocation: classpath:static/knif4j-home.md
+    enableSwaggerModels: true
+    swaggerModelName: 前后端交互Models
