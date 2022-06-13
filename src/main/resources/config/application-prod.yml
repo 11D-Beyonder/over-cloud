@@ -10,7 +10,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/over_cloud?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
     username: root
-    password: root-over-CLOUD-over-root
+    password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     properties:
@@ -25,12 +25,12 @@ knife4j:
   setting:
     enableFooter: false
     enableFooterCustom: true
-    footerCustomContent: Apache License 2.0 | Copyright  2022-[Tianze Zhu（OverCloud）](https://gitee.com/pro_11d_beyonder/over-cloud)
+    footerCustomContent: Apache License 2.0 | Copyright  2022-[Tianze Zhu（OverCloud）](https://github.com/11D-Beyonder/over-cloud)
     enableHomeCustom: true
     homeCustomLocation: classpath:static/knif4j-home.md
     enableSwaggerModels: true
     swaggerModelName: 前后端交互Models
   basic:
     enable: true
-    username: over-cloud
-    password: over-cloud
+    username: 
+    password: 
