@@ -10,7 +10,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/over_cloud?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
     username: root
-    password: root
+    password: root-over-CLOUD-over-root
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     properties:
