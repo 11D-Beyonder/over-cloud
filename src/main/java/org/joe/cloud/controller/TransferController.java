@@ -6,6 +6,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.joe.cloud.common.RestResponse;
+import org.joe.cloud.mapper.UserFileMapper;
 import org.joe.cloud.model.entity.PhysicalFile;
 import org.joe.cloud.model.entity.UserFile;
 import org.joe.cloud.model.vo.DownloadFileVo;
@@ -15,10 +16,7 @@ import org.joe.cloud.service.TransferService;
 import org.joe.cloud.service.UserFileService;
 import org.joe.cloud.util.DateTimeUtil;
 import org.joe.cloud.util.FileUtil;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +40,8 @@ public class TransferController {
     private UserFileService userFileService;
     @Resource
     private TransferService transferService;
+    @Resource
+    private UserFileMapper userFileMapper;
 
     @ApiOperation(value = "检查是否已上传", notes = "校验文件MD5判断文件是否存在，如果存在直接上传成功并返回data.skip=true，如果不存在返回skip=false需要再次调用该接口的POST方法")
     @GetMapping(value = "/upload")
@@ -83,5 +83,15 @@ public class TransferController {
     @GetMapping("/download")
     public void download(HttpServletResponse httpServletResponse, DownloadFileVo downloadFileVo) {
         transferService.download(httpServletResponse, downloadFileVo);
+    }
+
+    @ApiOperation(value = "从分享下载文件", notes = "下载文件接口，链接即key的思想")
+    @GetMapping("/share/download")
+    public void download(HttpServletResponse httpServletResponse, @RequestParam String url) {
+        //先判断url是否存在，存在则返回用户文件对象，并走正常下载流程，否则失败
+        DownloadFileVo downloadFileVo = userFileMapper.getFileDtoByUrl(url);
+        if (downloadFileVo != null) {
+            transferService.download(httpServletResponse, downloadFileVo);
+        }
     }
 }

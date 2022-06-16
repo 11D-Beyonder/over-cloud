@@ -37,6 +37,8 @@ public class ShiroConfig {
         filterRuleMap.put("/favicon.ico", "anon");
         filterRuleMap.put("/v2/**", "anon");
         filterRuleMap.put("/swagger**/**", "anon");
+        filterRuleMap.put("/transfer/share/download", "anon");
+
 
         // JWT 验证过滤器
         filterRuleMap.put("/**", "authcBearer");

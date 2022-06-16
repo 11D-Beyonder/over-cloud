@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.joe.cloud.model.dto.UserFileDto;
 import org.joe.cloud.model.entity.UserFile;
+import org.joe.cloud.model.vo.DownloadFileVo;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public interface UserFileMapper extends BaseMapper<UserFile> {
     List<UserFileDto> selectUserFileListByExtension(List<String> extensions, Long beginLoc, Long pageSize);
 
     List<UserFileDto> selectUserFileListNotInExtensions(List<String> extensions, Long beginLoc, Long pageSize);
-
+    List<UserFileDto> selectUserFileListShare(Long beginLoc, Long pageSize);
+    DownloadFileVo getFileDtoByUrl(String url);
     void updatePathByPath(String oldPath, String newPath);
 }

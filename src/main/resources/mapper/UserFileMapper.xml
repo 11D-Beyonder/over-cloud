@@ -37,6 +37,20 @@
 		and user_file.deleted = 0
 		limit #{beginLoc}, #{pageSize}
 	</select>
+	<select id="selectUserFileListShare" resultType="org.joe.cloud.model.dto.UserFileDto">
+		select user_file.id, `name`, `path`, extension, update_time, size, url, is_folder, urlkey
+		from share_file left join user_file on user_file.id = share_file.user_file_id left join physical_file on physical_file.id = user_file.physical_file_id
+		limit #{beginLoc}, #{pageSize}
+	</select>
+	<select id="getFileDtoByUrl" resultType="org.joe.cloud.model.vo.DownloadFileVo">
+		SELECT
+			user_file_id
+		FROM
+			share_file
+		WHERE
+			urlkey = #{url}
+	</select>
+
 
 	<update id="updatePathByPath">
 		update user_file

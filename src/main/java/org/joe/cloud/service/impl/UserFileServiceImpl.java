@@ -10,11 +10,13 @@ import org.joe.cloud.constant.FileConstant;
 import org.joe.cloud.exception.FileTypeNotFoundException;
 import org.joe.cloud.mapper.DeletedFileMapper;
 import org.joe.cloud.mapper.PhysicalFileMapper;
+import org.joe.cloud.mapper.ShareFileMapper;
 import org.joe.cloud.mapper.UserFileMapper;
 import org.joe.cloud.model.dto.TreeNodeDto;
 import org.joe.cloud.model.dto.UserFileDto;
 import org.joe.cloud.model.entity.DeletedFile;
 import org.joe.cloud.model.entity.PhysicalFile;
+import org.joe.cloud.model.entity.ShareFile;
 import org.joe.cloud.model.entity.UserFile;
 import org.joe.cloud.service.UserFileService;
 import org.joe.cloud.util.DateTimeUtil;
@@ -41,7 +43,8 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
     private DeletedFileMapper deletedFileMapper;
     @Resource
     private PhysicalFileMapper physicalFileMapper;
-
+    @Resource
+    private ShareFileMapper shareFileMapper;
     @Override
     public List<UserFileDto> getUserFileByPath(String path, Long currentPage, Long pageSize) {
         Long beginLoc = (currentPage - 1) * pageSize;
@@ -62,6 +65,8 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
         Long beginLoc = (currentPage - 1) * pageSize;
         if (type == FileConstant.OTHER_TYPE) {
             return userFileMapper.selectUserFileListNotInExtensions(getOtherExtensions(), beginLoc, pageSize);
+        } else if (type == FileConstant.SHARE_TYPE) {
+            return userFileMapper.selectUserFileListShare(beginLoc, pageSize);
         } else {
             return userFileMapper.selectUserFileListByExtension(getExtensions(type), beginLoc, pageSize);
         }
@@ -71,6 +76,8 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
     public Long countUserFileByType(int type) {
         if (type == FileConstant.OTHER_TYPE) {
             return userFileMapper.selectCount(new LambdaQueryWrapper<UserFile>().notIn(UserFile::getExtension, getOtherExtensions()).eq(UserFile::getDeleted, false));
+        } else if (type == FileConstant.SHARE_TYPE) {
+            return shareFileMapper.count();
         } else {
             return userFileMapper.selectCount(
                     new LambdaQueryWrapper<UserFile>()

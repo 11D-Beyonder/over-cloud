@@ -27,4 +27,6 @@ public class UserFileDto {
     private Boolean isFolder;
     @ApiModelProperty("实际路径")
     private String url;
+    @ApiModelProperty("分享码")
+    private String urlKey;
 }

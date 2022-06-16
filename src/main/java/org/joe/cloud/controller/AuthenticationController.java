@@ -39,7 +39,7 @@ public class AuthenticationController {
         return RestResponse.success("您已登录", res);
     }
 
-    @ApiOperation(value = "获取用户信息", notes = "在shiro上下文中得到用户信息，data.username得到用户名。")
+    @ApiOperation(value = "获取存储信息", notes = "在shiro上下文中得到用户信息，data.username得到用户名。")
     @GetMapping("/transfer/storage")
     public RestResponse storage() {
 
