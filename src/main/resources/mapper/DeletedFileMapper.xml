@@ -5,7 +5,7 @@
 <mapper namespace="org.joe.cloud.mapper.DeletedFileMapper">
 
 	<select id="selectAllDeletedFile" resultType="org.joe.cloud.model.dto.DeletedFileDto">
-		select deleted_file.id, name, extension, delete_time, size, is_folder, path
+		select user_file_id as id, name, extension, delete_time, size, is_folder, path
 		from deleted_file
 			     inner join user_file on deleted_file.user_file_id = user_file.id
 			     left join physical_file on user_file.physical_file_id = physical_file.id

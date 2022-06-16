@@ -8,9 +8,9 @@ spring:
       max-request-size: 200MB
       max-file-size: 1000MB
   datasource:
-    url: jdbc:mysql://localhost:3306/over_cloud?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+    url: jdbc:mysql://119.45.115.128:3306/over_cloud?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
     username: root
-    password: root
+    password: 0.1.2.3.
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     properties:

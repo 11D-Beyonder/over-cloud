@@ -151,4 +151,17 @@ public class FileController {
         res.put("list", deletedFileService.getAllDeletedFile(deletedFileListVo.getCurrentPage(), deletedFileListVo.getPageSize()));
         return RestResponse.success(null, res);
     }
+
+    @ApiOperation(value = "恢复文件", notes = "可以恢复回收站中的文件或者目录")
+    @PutMapping("/recover-flag")
+    public RestResponse recoverFile(@RequestBody DeleteFileVo deleteFileVo) {
+        userFileService.recoverUserFile(deleteFileVo.getId());
+        return RestResponse.success();
+    }
+    @ApiOperation(value = "彻底删除文件", notes = "可以彻底删除回收站中的文件或者目录")
+    @PutMapping("/delete-deep")
+    public RestResponse deleteFileDeep(@RequestBody DeleteFileVo deleteFileVo) {
+        userFileService.deleterUserFileDeep(deleteFileVo.getId());
+        return RestResponse.success();
+    }
 }

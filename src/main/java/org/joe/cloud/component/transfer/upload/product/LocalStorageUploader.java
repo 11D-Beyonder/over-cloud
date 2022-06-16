@@ -94,7 +94,12 @@ public class LocalStorageUploader extends Uploader {
                 }
                 tempFile.renameTo(targetFile);
                 if (FileUtil.isImageFile(uploadFileDto.getFileExtension())) {
-                    Thumbnails.of(targetFile).size(300, 300).toFile(minFile);
+                    try{
+                        Thumbnails.of(targetFile).size(300, 300).toFile(minFile);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
                 } else if (FileUtil.isVideoFile(uploadFileDto.getFileExtension())) {
                     FFmpegFrameGrabber frameGrabber = FFmpegFrameGrabber.createDefault(targetFile.getPath());
                     frameGrabber.start();

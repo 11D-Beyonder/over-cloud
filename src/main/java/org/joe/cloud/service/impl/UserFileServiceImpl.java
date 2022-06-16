@@ -1,22 +1,30 @@
 package org.joe.cloud.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.joe.cloud.component.transfer.download.Downloader;
 import org.joe.cloud.constant.FileConstant;
 import org.joe.cloud.exception.FileTypeNotFoundException;
 import org.joe.cloud.mapper.DeletedFileMapper;
+import org.joe.cloud.mapper.PhysicalFileMapper;
 import org.joe.cloud.mapper.UserFileMapper;
 import org.joe.cloud.model.dto.TreeNodeDto;
 import org.joe.cloud.model.dto.UserFileDto;
 import org.joe.cloud.model.entity.DeletedFile;
+import org.joe.cloud.model.entity.PhysicalFile;
 import org.joe.cloud.model.entity.UserFile;
 import org.joe.cloud.service.UserFileService;
 import org.joe.cloud.util.DateTimeUtil;
+import org.joe.cloud.util.TransferUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +39,8 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
     private UserFileMapper userFileMapper;
     @Resource
     private DeletedFileMapper deletedFileMapper;
+    @Resource
+    private PhysicalFileMapper physicalFileMapper;
 
     @Override
     public List<UserFileDto> getUserFileByPath(String path, Long currentPage, Long pageSize) {
@@ -194,6 +204,98 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
                 .eq(UserFile::getIsFolder, isFolder)
                 .eq(UserFile::getDeleted, false));
     }
+
+    /**
+     * 恢复文件
+     *
+     * @param id user_file_id
+     */
+    @Override
+    public void recoverUserFile(Long id) {
+        UserFile userFile = userFileMapper.selectById(id);
+        userFile.setDeleted(false);
+        userFileMapper.updateById(userFile);
+        QueryWrapper<DeletedFile> wrapper = new QueryWrapper<>();
+        wrapper.eq("user_file_id", id);
+        int deletedFile = deletedFileMapper.delete(wrapper);
+        if (userFile.getIsFolder()) {
+            /*
+                举例
+                文件夹所在位置 /test/
+                文件夹名      test
+                需要找到路径为 /test/test/... 的所有文件标记为删除
+             */
+            List<UserFile> userFilesNeedToDelete = userFileMapper.selectList(
+                    new LambdaQueryWrapper<UserFile>().likeRight(
+                            UserFile::getPath, userFile.getPath() + userFile.getName() + "/"
+                    )
+            );
+            for (UserFile f : userFilesNeedToDelete) {
+                f.setDeleted(false);
+                userFileMapper.updateById(f);
+            }
+        }
+    }
+
+    @Override
+    public void deleterUserFileDeep(Long id) {
+        UserFile userFile = userFileMapper.selectById(id);
+        userFileMapper.deleteById(userFile);
+        QueryWrapper<DeletedFile> wrapper = new QueryWrapper<>();
+        wrapper.eq("user_file_id", id);
+        int deletedFile = deletedFileMapper.delete(wrapper);
+        if (userFile.getIsFolder()) {
+            /*
+                举例
+                文件夹所在位置 /test/
+                文件夹名      test
+                需要找到路径为 /test/test/... 的所有文件标记为删除
+             */
+            List<UserFile> userFilesNeedToDelete = userFileMapper.selectList(
+                    new LambdaQueryWrapper<UserFile>().likeRight(
+                            UserFile::getPath, userFile.getPath() + userFile.getName() + "/"
+                    )
+            );
+            for (UserFile f : userFilesNeedToDelete) {
+                userFileMapper.deleteById(f);
+                //删除文件夹下的物理文件
+                //如果是文件，先减少引用数，<=1时则直接删除物理文件
+                PhysicalFile physicalFile = physicalFileMapper.selectById(f.getPhysicalFileId());
+                if (physicalFile.getQuotationCount() <= 1) {
+                    File file = new File(TransferUtil.getStaticPath() + physicalFile.getUrl());
+                    if (file.exists()) {
+                        if (file.delete()) {
+                            physicalFileMapper.deleteById(physicalFile);
+                            System.out.println(file.getName() + " 物理文件已被删除！");
+                        } else {
+                            System.out.println("物理文件删除失败！");
+                        }
+                    }
+                } else {
+                    physicalFile.setQuotationCount(physicalFile.getQuotationCount() - 1);
+                    physicalFileMapper.updateById(physicalFile);
+                }
+            }
+        } else {
+            //如果是文件，先减少引用数，<=1时则直接删除物理文件
+            PhysicalFile physicalFile = physicalFileMapper.selectById(userFile.getPhysicalFileId());
+            if (physicalFile.getQuotationCount() <= 1) {
+                File file = new File(TransferUtil.getStaticPath() + physicalFile.getUrl());
+                if (file.exists()) {
+                    if (file.delete()) {
+                        physicalFileMapper.deleteById(physicalFile);
+                        System.out.println(file.getName() + " 物理文件已被删除！");
+                    } else {
+                        System.out.println("物理文件删除失败！");
+                    }
+                }
+            } else {
+                physicalFile.setQuotationCount(physicalFile.getQuotationCount() - 1);
+                physicalFileMapper.updateById(physicalFile);
+            }
+        }
+    }
+
 
     private List<String> getOtherExtensions() {
         List<String> extensions = new ArrayList<>();

@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 @ApiModel("回收站文件DTO")
 public class DeletedFileDto {
-    @ApiModelProperty(value = "回收站文件ID", example = "2")
+    @ApiModelProperty(value = "用户文件ID", example = "2")
     private Long id;
     @ApiModelProperty(value = "文件名", example = "hello")
     private String name;

@@ -69,4 +69,8 @@ public interface UserFileService extends IService<UserFile> {
      * @param isFolder  是否为文件夹
      */
     boolean fileExist(String name, String extension, String path, Boolean isFolder);
+
+    void recoverUserFile(Long id);
+
+    void deleterUserFileDeep(Long id);
 }

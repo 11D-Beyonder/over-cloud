@@ -47,6 +47,7 @@ public class TransferController {
     @GetMapping(value = "/upload")
     public RestResponse upload(UploadFileVo uploadFileVo) {
         Map<String, Boolean> res = new HashMap<>(1);
+        System.out.println(uploadFileVo.getIdentifier());
         synchronized (TransferController.class) {
             PhysicalFile physicalFile = physicalFileService.getOne(new LambdaQueryWrapper<PhysicalFile>().eq(PhysicalFile::getIdentifier, uploadFileVo.getIdentifier()));
             if (physicalFile != null) {
