@@ -33,7 +33,7 @@ public abstract class Uploader {
 
     protected String generateSavePath() {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-        String path = FILE_SEPARATOR + ROOT_PATH + FILE_SEPARATOR + formatter.format(new Date());
+        String path = ROOT_PATH + FILE_SEPARATOR + formatter.format(new Date());
         String staticPath = TransferUtil.getStaticPath();
         File dir = new File(staticPath + path);
         if (!dir.exists()) {
