@@ -11,6 +11,7 @@ import org.joe.cloud.model.entity.PhysicalFile;
 import org.joe.cloud.model.entity.UserFile;
 import org.joe.cloud.model.vo.DownloadFileVo;
 import org.joe.cloud.model.vo.UploadFileVo;
+import org.joe.cloud.model.vo.UploadSmallFileVo;
 import org.joe.cloud.service.PhysicalFileService;
 import org.joe.cloud.service.TransferService;
 import org.joe.cloud.service.UserFileService;
@@ -72,20 +73,32 @@ public class TransferController {
         return RestResponse.success(null, res);
     }
 
-    @ApiOperation(value = "上传文件", notes = "上传文件接口")
+    @ApiOperation(value = "上传大文件", notes = "上传大文件接口，分片上传")
     @PostMapping("/upload")
     public RestResponse upload(HttpServletRequest httpServletRequest, UploadFileVo uploadFileVo) {
         transferService.upload(httpServletRequest, uploadFileVo);
         return RestResponse.success();
     }
+    @ApiOperation(value = "更新小文件", notes = "更新小文件接口,不用分片，用于支持代码，md等小文档在线编辑，网页api")
+    @PostMapping("/updateMd")
+    public RestResponse updateSmall(HttpServletRequest httpServletRequest, UploadSmallFileVo uploadSmallFileVo) {
+        transferService.updateSmall(httpServletRequest, uploadSmallFileVo);
+        return RestResponse.success();
+    }
+    @ApiOperation(value = "更新大文件", notes = "更新大文件接口，分片，用于支持同步，只需用户文件id一样，文件名和内容都可变更，客户端api")
+    @PostMapping("/update")
+    public RestResponse update(HttpServletRequest httpServletRequest, UploadFileVo uploadFileVo) {
+        transferService.update(httpServletRequest, uploadFileVo);
+        return RestResponse.success();
+    }
 
-    @ApiOperation(value = "下载文件", notes = "下载文件接口")
+    @ApiOperation(value = "下载文件", notes = "下载文件接口，支持分段下载")
     @GetMapping("/download")
     public void download(HttpServletResponse httpServletResponse, DownloadFileVo downloadFileVo) {
         transferService.download(httpServletResponse, downloadFileVo);
     }
 
-    @ApiOperation(value = "从分享下载文件", notes = "下载文件接口，链接即key的思想")
+    @ApiOperation(value = "从分享下载文件", notes = "下载文件接口，链接即key的思想，支持分段下载")
     @GetMapping("/share/download")
     public void download(HttpServletResponse httpServletResponse, @RequestParam String url) {
         //先判断url是否存在，存在则返回用户文件对象，并走正常下载流程，否则失败

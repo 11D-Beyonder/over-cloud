@@ -24,7 +24,7 @@ knife4j:
   enable: true
   setting:
     enableFooter: false
-    enableFooterCustom: true
+    enableFooterCustoover-cloudm: true
     footerCustomContent: Apache License 2.0 | Copyright  2022-[Tianze Zhu（OverCloud）](https://gitee.com/pro_11d_beyonder/over-cloud)
     enableHomeCustom: true
     homeCustomLocation: classpath:static/knif4j-home.md

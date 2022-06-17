@@ -11,6 +11,8 @@ import lombok.Data;
 @Data
 @ApiModel("分片上传VO")
 public class UploadFileVo {
+    @ApiModelProperty(value = "文件id，仅更新上传时使用", example = "1", notes = "从1开始标号")
+    private Integer id;
     @ApiModelProperty(value = "分片数", example = "1", notes = "从1开始标号")
     private Integer chunkNumber;
     @ApiModelProperty(value = "分片大小")
@@ -25,6 +27,6 @@ public class UploadFileVo {
     private Long currentChunkSize;
     @ApiModelProperty(value = "文件名")
     private String filename;
-    @ApiModelProperty(value = "保存路径")
+    @ApiModelProperty(value = "保存路径，更新时不用传，如果需要更新路径，请使用移动文件接口")
     private String filePath;
 }

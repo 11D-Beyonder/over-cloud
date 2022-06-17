@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.joe.cloud.model.dto.UploadFileDto;
 import org.joe.cloud.model.vo.UploadFileVo;
+import org.joe.cloud.model.vo.UploadSmallFileVo;
 import org.joe.cloud.util.TransferUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -81,4 +82,6 @@ public abstract class Uploader {
         statusFile.delete();
         return true;
     }
+
+    public abstract UploadFileDto uploadSmall(HttpServletRequest httpServletRequest, UploadSmallFileVo uploadSmallFileVo);
 }

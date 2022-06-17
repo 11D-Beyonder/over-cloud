@@ -32,5 +32,5 @@ knife4j:
     swaggerModelName: 前后端交互Models
   basic:
     enable: true
-    username: 
-    password: 
+    username: root
+    password: root-over-CLOUD-over-root
