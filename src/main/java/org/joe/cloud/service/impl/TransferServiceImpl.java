@@ -73,26 +73,44 @@ public class TransferServiceImpl implements TransferService {
             if (uploadFileDto.getSuccess()) {
                 //先根据查到的信息删除旧的实际文件
                 PhysicalFile physicalFile = physicalFileMapper.selectById(userFile.getPhysicalFileId());
-                String FilePath = TransferUtil.getStaticPath() + physicalFile.getUrl();
-                String minFilePath = TransferUtil.getStaticPath() + physicalFile.getUrl() + "_min";
+                if (physicalFile.getQuotationCount() > 1) {
+                    //不能删除旧文件，新增一条物理文件记录，同时修改用户文件信息
 
-                File targetFile = new File(FilePath);
-                targetFile.delete();
-                //不是所有文件都有缩略图
-                File minFile = new File(minFilePath);
-                if (minFile.exists())
-                    minFile.delete();
+                    userFile.setName(uploadFileDto.getFileName());
+                    userFile.setExtension(uploadFileDto.getFileExtension());
+                    userFile.setUpdateTime(DateTimeUtil.getCurrentTime());
+                    userFileMapper.updateById(userFile);
 
-                //再更新逻辑文件信息
-                userFile.setName(uploadFileDto.getFileName());
-                userFile.setExtension(uploadFileDto.getFileExtension());
-                userFile.setUpdateTime(DateTimeUtil.getCurrentTime());
-                userFileMapper.updateById(userFile);
+                    physicalFile.setQuotationCount(1l);
+                    physicalFile.setIdentifier(uploadFileVo.getIdentifier());
+                    physicalFile.setSize(uploadFileVo.getTotalSize());
+                    physicalFile.setUrl(uploadFileDto.getUrl());
+                    physicalFileMapper.insert(physicalFile);
 
-                physicalFile.setIdentifier(uploadFileVo.getIdentifier());
-                physicalFile.setSize(uploadFileVo.getTotalSize());
-                physicalFile.setUrl(uploadFileDto.getUrl());
-                physicalFileMapper.updateById(physicalFile);
+                } else {
+                    //删除旧文件，修改物理文件记录，修改用户文件信息
+                    String FilePath = TransferUtil.getStaticPath() + physicalFile.getUrl();
+                    String minFilePath = TransferUtil.getStaticPath() + physicalFile.getUrl() + "_min";
+
+                    File targetFile = new File(FilePath);
+                    targetFile.delete();
+                    //不是所有文件都有缩略图
+                    File minFile = new File(minFilePath);
+                    if (minFile.exists())
+                        minFile.delete();
+
+                    //再更新逻辑文件信息
+                    userFile.setName(uploadFileDto.getFileName());
+                    userFile.setExtension(uploadFileDto.getFileExtension());
+                    userFile.setUpdateTime(DateTimeUtil.getCurrentTime());
+                    userFileMapper.updateById(userFile);
+
+                    physicalFile.setIdentifier(uploadFileVo.getIdentifier());
+                    physicalFile.setSize(uploadFileVo.getTotalSize());
+                    physicalFile.setUrl(uploadFileDto.getUrl());
+                    physicalFileMapper.updateById(physicalFile);
+                }
+
 
             }
         }
@@ -110,29 +128,45 @@ public class TransferServiceImpl implements TransferService {
             if (uploadFileDto.getSuccess()) {
                 //先根据查到的信息删除旧的实际文件
                 PhysicalFile physicalFile = physicalFileMapper.selectById(userFile.getPhysicalFileId());
-                String FilePath = TransferUtil.getStaticPath() + physicalFile.getUrl();
-                String minFilePath = TransferUtil.getStaticPath() + physicalFile.getUrl() + "_min";
+                if (physicalFile.getQuotationCount() > 1) {
+                    //不能删除旧文件，新增一条物理文件记录，同时修改用户文件信息
 
-                File targetFile = new File(FilePath);
-                targetFile.delete();
-                //不是所有文件都有缩略图
-                File minFile = new File(minFilePath);
-                if (minFile.exists())
-                    minFile.delete();
+                    userFile.setName(uploadFileDto.getFileName());
+                    userFile.setExtension(uploadFileDto.getFileExtension());
+                    userFile.setUpdateTime(DateTimeUtil.getCurrentTime());
+                    userFileMapper.updateById(userFile);
+
+                    physicalFile.setQuotationCount(1l);
+                    physicalFile.setIdentifier(uploadSmallFileVo.getIdentifier());
+                    physicalFile.setSize(uploadSmallFileVo.getTotalSize());
+                    physicalFile.setUrl(uploadFileDto.getUrl());
+                    physicalFileMapper.insert(physicalFile);
+
+                } else {
+                    String FilePath = TransferUtil.getStaticPath() + physicalFile.getUrl();
+                    String minFilePath = TransferUtil.getStaticPath() + physicalFile.getUrl() + "_min";
+
+                    File targetFile = new File(FilePath);
+                    targetFile.delete();
+                    //不是所有文件都有缩略图
+                    File minFile = new File(minFilePath);
+                    if (minFile.exists())
+                        minFile.delete();
 
 
-                //再更新逻辑文件信息
-                userFile.setName(uploadFileDto.getFileName());
-                userFile.setExtension(uploadFileDto.getFileExtension());
-                userFile.setIsFolder(false);
-                userFile.setUpdateTime(DateTimeUtil.getCurrentTime());
-                userFileMapper.updateById(userFile);
+                    //再更新逻辑文件信息
+                    userFile.setName(uploadFileDto.getFileName());
+                    userFile.setExtension(uploadFileDto.getFileExtension());
+                    userFile.setIsFolder(false);
+                    userFile.setUpdateTime(DateTimeUtil.getCurrentTime());
+                    userFileMapper.updateById(userFile);
 
-                physicalFile.setIdentifier(uploadSmallFileVo.getIdentifier());
-                physicalFile.setSize(uploadSmallFileVo.getTotalSize());
-                physicalFile.setStorageLocation(StorageLocationEnum.LOCAL);
-                physicalFile.setUrl(uploadFileDto.getUrl());
-                physicalFileMapper.updateById(physicalFile);
+                    physicalFile.setIdentifier(uploadSmallFileVo.getIdentifier());
+                    physicalFile.setSize(uploadSmallFileVo.getTotalSize());
+                    physicalFile.setStorageLocation(StorageLocationEnum.LOCAL);
+                    physicalFile.setUrl(uploadFileDto.getUrl());
+                    physicalFileMapper.updateById(physicalFile);
+                }
             }
         }
     }
