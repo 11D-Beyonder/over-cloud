@@ -8,6 +8,7 @@ import org.joe.cloud.common.RestResponse;
 import org.joe.cloud.model.entity.User;
 import org.joe.cloud.model.vo.EnterVo;
 import org.joe.cloud.service.UserService;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,7 @@ import javax.annotation.Resource;
 @ApiSupport(author = "Tianze Zhu")
 @Api(tags = "安装")
 @RestController
+@CrossOrigin
 public class InstallController {
     @Resource
     UserService userService;

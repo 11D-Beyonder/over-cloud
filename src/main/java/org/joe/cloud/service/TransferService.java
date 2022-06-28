@@ -16,4 +16,5 @@ public interface TransferService {
     void update(HttpServletRequest httpServletRequest, UploadFileVo uploadFileVo);
     void updateSmall(HttpServletRequest httpServletRequest, UploadSmallFileVo uploadSmallFileVo);
     void download(HttpServletResponse httpServletResponse, DownloadFileVo downloadFileVo);
+    void chunkdownload(String range,HttpServletResponse httpServletResponse, DownloadFileVo downloadFileVo);
 }

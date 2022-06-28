@@ -23,6 +23,7 @@ import java.util.Map;
 @ApiSupport(author = "Tianze Zhu")
 @Api(tags = "权限认证")
 @RestController
+@CrossOrigin
 public class AuthenticationController {
     @Autowired
     PhysicalFileMapper physicalFileMapper;

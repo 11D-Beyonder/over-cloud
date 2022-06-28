@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class TokenValidateRealm extends AuthenticatingRealm {
+
+
     public TokenValidateRealm() {
         super((token, info) -> {
             String bearerToken = ((BearerToken) token).getToken();
@@ -34,4 +36,5 @@ public class TokenValidateRealm extends AuthenticatingRealm {
         user.setUsername(JwtProcessor.getUsernameByToken(bearerToken));
         return new SimpleAuthenticationInfo(user, bearerToken, "TokenValidateRealm");
     }
+
 }

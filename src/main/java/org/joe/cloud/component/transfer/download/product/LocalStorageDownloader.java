@@ -20,6 +20,7 @@ public class LocalStorageDownloader extends Downloader {
         BufferedInputStream bufferedInputStream = null;
         if (file.exists()) {
             try {
+                httpServletResponse.setContentLengthLong(file.length());
                 FileInputStream fileInputStream = new FileInputStream(file);
                 bufferedInputStream = new BufferedInputStream(fileInputStream);
                 OutputStream outputStream = httpServletResponse.getOutputStream();

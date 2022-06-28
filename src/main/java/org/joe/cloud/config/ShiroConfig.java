@@ -4,6 +4,9 @@ import org.apache.shiro.authz.Authorizer;
 import org.apache.shiro.authz.ModularRealmAuthorizer;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
+import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.joe.cloud.component.realm.TokenValidateRealm;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,6 +29,11 @@ public class ShiroConfig {
     @Bean
     public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager) {
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
+
+//        Map filters = shiroFilterFactoryBean.getFilters();
+//        filters.put("authcBearer", new ShiroUserFilter());
+//        shiroFilterFactoryBean.setFilters(filters);
+
         Map<String, String> filterRuleMap = new HashMap<>();
         // 不必验证
         filterRuleMap.put("/login", "anon");
@@ -38,8 +46,9 @@ public class ShiroConfig {
         filterRuleMap.put("/v2/**", "anon");
         filterRuleMap.put("/swagger**/**", "anon");
         filterRuleMap.put("/transfer/share/download", "anon");
-
-
+        filterRuleMap.put("/upload/**", "anon");
+//        filterRuleMap.put("/transfer/download2", "anon");
+//        filterRuleMap.put("/transfer/download", "anon");
         // JWT 验证过滤器
         filterRuleMap.put("/**", "authcBearer");
 
@@ -52,4 +61,11 @@ public class ShiroConfig {
     public Authorizer authorizer() {
         return new ModularRealmAuthorizer();
     }
+//    @Bean
+//    public DefaultWebSecurityManager manager(TokenValidateRealm tokenValidateRealm){
+//        DefaultWebSecurityManager manager = new DefaultWebSecurityManager();
+//        manager.setRealm(tokenValidateRealm);
+//        return manager;
+//    }
+
 }

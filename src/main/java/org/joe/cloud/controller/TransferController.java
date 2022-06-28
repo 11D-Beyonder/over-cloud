@@ -33,6 +33,7 @@ import java.util.Map;
 @Api(tags = "文件传输")
 @RestController
 @Slf4j
+@CrossOrigin
 @RequestMapping("/transfer")
 public class TransferController {
     @Resource
@@ -79,12 +80,14 @@ public class TransferController {
         transferService.upload(httpServletRequest, uploadFileVo);
         return RestResponse.success();
     }
+
     @ApiOperation(value = "更新小文件", notes = "更新小文件接口,不用分片，用于支持代码，md等小文档在线编辑，网页api")
     @PostMapping("/updateMd")
     public RestResponse updateSmall(HttpServletRequest httpServletRequest, UploadSmallFileVo uploadSmallFileVo) {
         transferService.updateSmall(httpServletRequest, uploadSmallFileVo);
         return RestResponse.success();
     }
+
     @ApiOperation(value = "更新大文件", notes = "更新大文件接口，分片，用于支持同步，只需用户文件id一样，文件名和内容都可变更，客户端api")
     @PostMapping("/update")
     public RestResponse update(HttpServletRequest httpServletRequest, UploadFileVo uploadFileVo) {
@@ -97,6 +100,24 @@ public class TransferController {
     public void download(HttpServletResponse httpServletResponse, DownloadFileVo downloadFileVo) {
         transferService.download(httpServletResponse, downloadFileVo);
     }
+
+    /**
+     * 文件分片下载
+     *
+     * @param range    http请求头Range，用于表示请求指定部分的内容。
+     *                 格式为：Range: bytes=start-end  [start,end]表示，即是包含请求头的start及end字节的内容
+     * @param request
+     * @param response
+     */
+    @ApiOperation(value = "分片下载文件", notes = "下载文件接口，支持分段下载")
+    @GetMapping("/download2")
+    public void fileChunkDownload(DownloadFileVo downloadFileVo, @RequestHeader(value = "Range",required = false)String range, HttpServletResponse response) {
+
+        transferService.chunkdownload(range, response, downloadFileVo);
+
+
+    }
+
 
     @ApiOperation(value = "从分享下载文件", notes = "下载文件接口，链接即key的思想，支持分段下载")
     @GetMapping("/share/download")

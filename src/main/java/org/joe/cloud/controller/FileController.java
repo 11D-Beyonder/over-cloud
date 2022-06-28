@@ -29,6 +29,7 @@ import java.util.Map;
 @Api(tags = "文件操作")
 @RestController
 @RequestMapping("/file")
+@CrossOrigin
 public class FileController {
     @Resource
     UserFileService userFileService;

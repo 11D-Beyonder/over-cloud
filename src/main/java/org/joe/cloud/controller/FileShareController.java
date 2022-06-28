@@ -27,6 +27,7 @@ import java.util.Map;
 @Api(tags = "文件分享操作")
 @RestController
 @RequestMapping("/share")
+@CrossOrigin
 public class FileShareController {
     @Resource
     UserFileService userFileService;

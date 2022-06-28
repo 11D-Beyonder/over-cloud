@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -81,6 +81,8 @@ public class TransferServiceImpl implements TransferService {
                     userFile.setUpdateTime(DateTimeUtil.getCurrentTime());
                     userFileMapper.updateById(userFile);
 
+                    //注意id需置为空，让数据库自行决定新的id
+                    physicalFile.setId(null);
                     physicalFile.setQuotationCount(1l);
                     physicalFile.setIdentifier(uploadFileVo.getIdentifier());
                     physicalFile.setSize(uploadFileVo.getTotalSize());
@@ -179,10 +181,115 @@ public class TransferServiceImpl implements TransferService {
             fileName += "." + userFile.getExtension();
         }
         fileName = new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
+
         httpServletResponse.setContentType("application/force-download");
         httpServletResponse.addHeader("Content-Disposition", "attachment;fileName=" + fileName);
         PhysicalFile physicalFile = physicalFileMapper.selectById(userFile.getPhysicalFileId());
         Downloader downloader = transferToolFactory.getDownloader();
         downloader.download(httpServletResponse, physicalFile.getUrl());
+    }
+
+    @Override
+    public void chunkdownload(String range, HttpServletResponse httpServletResponse, DownloadFileVo downloadFileVo) {
+        UserFile userFile = userFileMapper.selectById(downloadFileVo.getId());
+        String fileName = userFile.getName();
+        if (userFile.getExtension() != null) {
+            fileName += "." + userFile.getExtension();
+        }
+        fileName = new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
+        PhysicalFile physicalFile = physicalFileMapper.selectById(userFile.getPhysicalFileId());
+
+        //要下载的文件，此处以项目pom.xml文件举例说明。实际项目请根据实际业务场景获取
+        File file = new File(TransferUtil.getStaticPath() + physicalFile.getUrl());
+
+        //开始下载位置
+        long startByte = 0;
+        //结束下载位置
+        long endByte = file.length() - 1;
+
+        //有range的话
+        if (range != null && range.contains("bytes=") && range.contains("-")) {
+            range = range.substring(range.lastIndexOf("=") + 1).trim();
+            String ranges[] = range.split("-");
+            try {
+                //根据range解析下载分片的位置区间
+                if (ranges.length == 1) {
+                    //情况1，如：bytes=-1024  从开始字节到第1024个字节的数据
+                    if (range.startsWith("-")) {
+                        endByte = Long.parseLong(ranges[0]);
+                    }
+                    //情况2，如：bytes=1024-  第1024个字节到最后字节的数据
+                    else if (range.endsWith("-")) {
+                        startByte = Long.parseLong(ranges[0]);
+                    }
+                }
+                //情况3，如：bytes=1024-2048  第1024个字节到2048个字节的数据
+                else if (ranges.length == 2) {
+                    startByte = Long.parseLong(ranges[0]);
+                    endByte = Long.parseLong(ranges[1]);
+                }
+
+            } catch (NumberFormatException e) {
+                startByte = 0;
+                endByte = file.length() - 1;
+            }
+        }
+
+        //要下载的长度
+        long contentLength = endByte - startByte + 1;
+
+        //响应头设置
+        //https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Accept-Ranges
+        httpServletResponse.setHeader("Accept-Ranges", "bytes");
+        //Content-Type 表示资源类型，如：文件类型
+//        httpServletResponse.setHeader("Content-Type", contentType);
+        //Content-Disposition 表示响应内容以何种形式展示，是以内联的形式（即网页或者页面的一部分），还是以附件的形式下载并保存到本地。
+        // 这里文件名换成下载后你想要的文件名，inline表示内联的形式，即：浏览器直接下载
+        httpServletResponse.setHeader("Content-Disposition", "inline;filename=pom.xml");
+        //Content-Length 表示资源内容长度，即：文件大小
+        httpServletResponse.setHeader("Content-Length", String.valueOf(contentLength));
+        //Content-Range 表示响应了多少数据，格式为：[要下载的开始位置]-[结束位置]/[文件总大小]
+        httpServletResponse.setHeader("Content-Range", "bytes " + startByte + "-" + endByte + "/" + file.length());
+
+        httpServletResponse.setStatus(httpServletResponse.SC_OK);
+//        httpServletResponse.setContentType(contentType);
+
+        BufferedOutputStream outputStream = null;
+        RandomAccessFile randomAccessFile = null;
+        //已传送数据大小
+        long transmitted = 0;
+        try {
+            randomAccessFile = new RandomAccessFile(file, "r");
+            outputStream = new BufferedOutputStream(httpServletResponse.getOutputStream());
+            byte[] buff = new byte[2048];
+            int len = 0;
+            randomAccessFile.seek(startByte);
+            //判断是否到了最后不足2048（buff的length）个byte
+            while ((transmitted + len) <= contentLength && (len = randomAccessFile.read(buff)) != -1) {
+                outputStream.write(buff, 0, len);
+                transmitted += len;
+            }
+            //处理不足buff.length部分
+            if (transmitted < contentLength) {
+                len = randomAccessFile.read(buff, 0, (int) (contentLength - transmitted));
+                outputStream.write(buff, 0, len);
+                transmitted += len;
+            }
+
+            outputStream.flush();
+            httpServletResponse.flushBuffer();
+            randomAccessFile.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (randomAccessFile != null) {
+                    randomAccessFile.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
