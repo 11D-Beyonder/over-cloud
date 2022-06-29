@@ -11,4 +11,5 @@ import org.joe.cloud.model.entity.PhysicalFile;
 @Mapper
 public interface PhysicalFileMapper extends BaseMapper<PhysicalFile> {
     Long getUsedStorage();
+    Integer insertFile(PhysicalFile physicalFile);
 }

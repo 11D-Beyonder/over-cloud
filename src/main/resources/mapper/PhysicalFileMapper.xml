@@ -3,7 +3,11 @@
 		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.joe.cloud.mapper.PhysicalFileMapper">
-    <select id="getUsedStorage" resultType="java.lang.Long">
+	<insert id="insertFile" useGeneratedKeys="true" keyProperty="id" parameterType="org.joe.cloud.model.entity.PhysicalFile">
+		insert into physical_file(identifier,quotation_count,size,storage_location,url)
+		values(#{identifier},#{quotationCount},#{size},#{storageLocation},#{url})
+	</insert>
+	<select id="getUsedStorage" resultType="java.lang.Long">
 		SELECT Sum(size) num FROM physical_file;
 	</select>
 </mapper>

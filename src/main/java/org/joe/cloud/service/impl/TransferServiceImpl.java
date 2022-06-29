@@ -74,12 +74,9 @@ public class TransferServiceImpl implements TransferService {
                 //先根据查到的信息删除旧的实际文件
                 PhysicalFile physicalFile = physicalFileMapper.selectById(userFile.getPhysicalFileId());
                 if (physicalFile.getQuotationCount() > 1) {
-                    //不能删除旧文件，新增一条物理文件记录，同时修改用户文件信息
-
-                    userFile.setName(uploadFileDto.getFileName());
-                    userFile.setExtension(uploadFileDto.getFileExtension());
-                    userFile.setUpdateTime(DateTimeUtil.getCurrentTime());
-                    userFileMapper.updateById(userFile);
+                    //不能删除旧文件,但需减少旧文件的一次引用，新增一条物理文件记录,同时修改用户文件physicalId
+                    physicalFile.setQuotationCount(physicalFile.getQuotationCount()-1);
+                    physicalFileMapper.updateById(physicalFile);
 
                     //注意id需置为空，让数据库自行决定新的id
                     physicalFile.setId(null);
@@ -87,7 +84,15 @@ public class TransferServiceImpl implements TransferService {
                     physicalFile.setIdentifier(uploadFileVo.getIdentifier());
                     physicalFile.setSize(uploadFileVo.getTotalSize());
                     physicalFile.setUrl(uploadFileDto.getUrl());
-                    physicalFileMapper.insert(physicalFile);
+                    physicalFileMapper.insertFile(physicalFile);//将新的id放入此变量
+
+                    userFile.setName(uploadFileDto.getFileName());
+                    userFile.setExtension(uploadFileDto.getFileExtension());
+                    userFile.setUpdateTime(DateTimeUtil.getCurrentTime());
+                    userFile.setPhysicalFileId(physicalFile.getId());
+                    userFileMapper.updateById(userFile);
+
+
 
                 } else {
                     //删除旧文件，修改物理文件记录，修改用户文件信息
